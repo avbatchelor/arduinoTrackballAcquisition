@@ -1,17 +1,17 @@
+// Import libraries
 #include <SPI.h>
 #include <avr/pgmspace.h>
 
 byte initComplete=0;
-byte Motion;
+volatile int xydat[2];
+volatile byte movementflag=0;
+const int ncs = 51;
+const int mot = 53;
 byte xH;
 byte xL;
 byte yH;
 byte yL;
-int xydat[2];
-
-const int ncs = 0;
-const int xVelPin = 3;
-const int yVelPin = 4;
+byte Motion;
 
 // Registers
 #define REG_Product_ID                           0x00
@@ -63,25 +63,25 @@ const int yVelPin = 4;
 extern const unsigned short firmware_length;
 extern prog_uchar firmware_data[];
 
-void setup() {  
-  //analogWriteFrequency(xVelPin,11500);
-  //analogWriteFrequency(yVelPin,11500);
-  analogWriteResolution(12);
-  pinMode (ncs, OUTPUT);  
+void setup() {
+  Serial.begin(9600);
+  
+  pinMode (ncs, OUTPUT);
+  pinMode (mot, INPUT);
+  
+  attachInterrupt(mot, readXY, FALLING);
+  
   SPI.begin();
   SPI.setDataMode(SPI_MODE3);
   SPI.setBitOrder(MSBFIRST);
-  SPI.setClockDivider(2);
- 
-  delay(1000);
-  performStartup();
+  SPI.setClockDivider(8);
+
+  performStartup();  
   delay(10);
+  Serial.println("ADNS9800testPolling");
   adns_write_reg(REG_Configuration_I, 0x29); // maximum resolution
-  //adns_write_reg(REG_Configuration_I, 0x09); // default resolution
-  //adns_write_reg(REG_Configuration_I, 0x01); // minimum resolution
-  delay(10);  
-  //dispRegisters();
-  delay(3000);
+  dispRegisters();
+  delay(5000);
   initComplete=9;
 
 }
@@ -176,14 +176,33 @@ void performStartup(void){
   byte laser_ctrl0 = adns_read_reg(REG_LASER_CTRL0);
   adns_write_reg(REG_LASER_CTRL0, laser_ctrl0 & 0xf0 );
   
-  delay(10);
+  delay(1);
+
+  Serial.println("Optical Chip Initialized");
+  }
+
+void readXY(void){
+  if(initComplete==9){
+
+    digitalWrite(ncs,LOW);
+    Motion = (adns_read_reg(REG_Motion) & (1 << 8-1)) != 0;
+    xL = (int)adns_read_reg(REG_Delta_X_L);
+    xH = (int)adns_read_reg(REG_Delta_X_H);
+    yL = (int)adns_read_reg(REG_Delta_Y_L);
+    yH = (int)adns_read_reg(REG_Delta_Y_H);
+    xydat[0] = (xH << 8) + xL;
+    xydat[1] = (yH << 8) + yL;
+    digitalWrite(ncs,HIGH);     
+
+    //movementflag=1;
+    }
   }
 
 void dispRegisters(void){
   int oreg[7] = {
-    0x00,0x3F,0x2A,0x0F  };
+    0x00,0x3F,0x2A,0x02  };
   char* oregname[] = {
-    "Product_ID","Inverse_Product_ID","SROM_Version","CPI"  };
+    "Product_ID","Inverse_Product_ID","SROM_Version","Motion"  };
   byte regres;
 
   digitalWrite(ncs,LOW);
@@ -203,39 +222,26 @@ void dispRegisters(void){
   digitalWrite(ncs,HIGH);
 }
 
-int readXY(int *xy){
-  digitalWrite(ncs,LOW);
-  
-  Motion = (adns_read_reg(REG_Motion) & (1 << 8-1)) != 0;
-  xL = adns_read_reg(REG_Delta_X_L);
-  xH = adns_read_reg(REG_Delta_X_H);
-  yL = adns_read_reg(REG_Delta_Y_L);
-  yH = adns_read_reg(REG_Delta_Y_H);
-  xy[0] = (xH << 8) + xL;
-  xy[1] = (yH << 8) + yL;
 
-  if(xy[0] & 0x8000){
-    xy[0] = -1 * ((xy[0] ^ 0xffff) + 1);
+int convTwosComp(int b){
+  //Convert from 2's complement
+  if(b & 0x8000){
+    b = -1 * ((b ^ 0xffff) + 1);
+    }
+  return b;
   }
-  if (xy[1] & 0x8000){
-    xy[1] = -1 * ((xy[1] ^ 0xffff) + 1);
-  }
-  
-  digitalWrite(ncs,HIGH);     
-  } 
-
   
   void loop() {
   
-    readXY(&xydat[0]);
-    //analogWrite(xVelPin,xydat[0]+2048);
-    //analogWrite(yVelPin,xydat[1]+2048);
-    if(xydat[0] != 0 || xydat[1] != 0){
+    readXY();
+    xydat[0] = convTwosComp(xydat[0]);
+    xydat[1] = convTwosComp(xydat[1]);
+      if(xydat[0] != 0 || xydat[1] != 0){
         Serial.print("x = ");
         Serial.print(xydat[0]);
         Serial.print(" | ");
         Serial.print("y = ");
         Serial.println(xydat[1]);
         }
-    delay(5);
   }
+

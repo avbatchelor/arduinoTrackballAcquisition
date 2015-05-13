@@ -10,6 +10,7 @@ unsigned long pollTimer;
 volatile int xydat[2];
 volatile byte movementflag=0;
 const int ncs = 51;
+const int mot = 53;
 
 // Registers
 #define REG_Product_ID                           0x00
@@ -66,7 +67,7 @@ void setup() {
   
   pinMode (ncs, OUTPUT);
   
-  //attachInterrupt(0, UpdatePointer, FALLING);
+  attachInterrupt(mot, UpdatePointer, FALLING);
   
   SPI.begin();
   SPI.setDataMode(SPI_MODE3);
