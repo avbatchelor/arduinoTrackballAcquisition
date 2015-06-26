@@ -7,11 +7,20 @@ volatile int xydat[2];
 volatile byte movementflag=0;
 const int ncs = 51;
 const int mot = 53;
+const int xOutPin = DAC0;
+const int yOutPin = DAC1; 
 byte xH;
 byte xL;
 byte yH;
 byte yL;
 byte Motion;
+const int aWriteRes = 12;
+unsigned long currTime;
+unsigned long pollTimer;
+long cumX; 
+long cumY;
+int remX; 
+int remY;
 
 // Registers
 #define REG_Product_ID                           0x00
@@ -68,13 +77,14 @@ void setup() {
   
   pinMode (ncs, OUTPUT);
   pinMode (mot, INPUT);
+  analogWriteResolution(aWriteRes); 
   
-  attachInterrupt(mot, readXY, FALLING);
+  //attachInterrupt(mot, readXY, FALLING);
   
   SPI.begin();
   SPI.setDataMode(SPI_MODE3);
   SPI.setBitOrder(MSBFIRST);
-  SPI.setClockDivider(8);
+  SPI.setClockDivider(42);
 
   performStartup();  
   delay(10);
@@ -232,16 +242,29 @@ int convTwosComp(int b){
   }
   
   void loop() {
-  
+    currTime = micros();
+    
+    //if(currTime > pollTimer){
     readXY();
     xydat[0] = convTwosComp(xydat[0]);
     xydat[1] = convTwosComp(xydat[1]);
-      if(xydat[0] != 0 || xydat[1] != 0){
+    cumX = cumX + xydat[0];
+    cumY = cumY + xydat[1];
+    remX = (cumX % 2048) + 2048;
+    remY = (cumY % 2048) + 2048;
+        Serial.print("currTime");            
+        Serial.print(currTime);
+        Serial.print(" | ");  
         Serial.print("x = ");
         Serial.print(xydat[0]);
         Serial.print(" | ");
         Serial.print("y = ");
         Serial.println(xydat[1]);
-        }
+        analogWrite(xOutPin,4095); //has to be a number between 0 and 4095 - need to choose an appropriate gain to do this
+        analogWrite(yOutPin,4095); //has to be a number between 0 and 4095 - need to choose an appropriate gain to do this
+    //pollTimer = currTime + 10;  // Read from sensor every 10 milliseconds 
+    //}
+      
   }
+ 
 

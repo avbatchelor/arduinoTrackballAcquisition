@@ -1,6 +1,15 @@
 #include <SPI.h>
 #include <avr/pgmspace.h>
 
+byte initComplete=0;
+byte testctr=0;
+unsigned long currTime;
+unsigned long timer;
+unsigned long pollTimer;
+volatile int xydat[2];
+volatile byte movementflag=0;
+const int ncs = 51;
+
 // Registers
 #define REG_Product_ID                           0x00
 #define REG_Revision_ID                          0x01
@@ -48,15 +57,6 @@
 #define REG_SROM_Load_Burst                      0x62
 #define REG_Pixel_Burst                          0x64
 
-byte initComplete=0;
-byte testctr=0;
-unsigned long currTime;
-unsigned long timer;
-unsigned long pollTimer;
-volatile int xydat[2];
-volatile byte movementflag=0;
-const int ncs = 10;
-
 extern const unsigned short firmware_length;
 extern prog_uchar firmware_data[];
 
@@ -70,8 +70,10 @@ void setup() {
   SPI.begin();
   SPI.setDataMode(SPI_MODE3);
   SPI.setBitOrder(MSBFIRST);
-  SPI.setClockDivider(8);
-
+  //SPI.setClockDivider(8);
+  SPI.setClockDivider(42); // For Due -- set clock to 2MHz, max speed for the ADNS9800
+  //SPI.setClockDivider(84); // For Due -- set clock to 1MHz, 
+  
   performStartup();  
   Serial.println("ADNS9800testPolling");
   dispRegisters();
