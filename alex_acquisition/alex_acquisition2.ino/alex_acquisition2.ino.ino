@@ -250,8 +250,10 @@ int convTwosComp(int b){
     xydat[1] = convTwosComp(xydat[1]);
     cumX = cumX + xydat[0];
     cumY = cumY + xydat[1];
-    remX = (cumX % 2048) + 2048;
-    remY = (cumY % 2048) + 2048;
+    remX = (cumX % 137) + 137;
+    remY = (cumY % 137) + 137;
+    remX = remX * 15; 
+    remY = remY * 15;
         Serial.print("currTime");            
         Serial.print(currTime);
         Serial.print(" | ");  
@@ -260,8 +262,8 @@ int convTwosComp(int b){
         Serial.print(" | ");
         Serial.print("y = ");
         Serial.println(xydat[1]);
-        analogWrite(xOutPin,4095); //has to be a number between 0 and 4095 - need to choose an appropriate gain to do this
-        analogWrite(yOutPin,4095); //has to be a number between 0 and 4095 - need to choose an appropriate gain to do this
+        analogWrite(xOutPin,remX); //has to be a number between 0 and 4095 - need to choose an appropriate gain to do this
+        analogWrite(yOutPin,remY); //has to be a number between 0 and 4095 - need to choose an appropriate gain to do this
     //pollTimer = currTime + 10;  // Read from sensor every 10 milliseconds 
     //}
       
