@@ -21,6 +21,7 @@ long cumX;
 long cumY;
 int remX; 
 int remY;
+int randNumber;
 
 // Registers
 #define REG_Product_ID                           0x00
@@ -243,9 +244,10 @@ int convTwosComp(int b){
   
   void loop() {
     for(int x = 0; x < 4096; x = x + 15){
-      analogWrite(xOutPin,x);
-      analogWrite(yOutPin,x);
-      Serial.println(x);
+      randNumber = random(0, 274);
+      analogWrite(xOutPin,randNumber*15);
+      analogWrite(yOutPin,randNumber*15);
+      Serial.println(randNumber);
     }
       
   }
