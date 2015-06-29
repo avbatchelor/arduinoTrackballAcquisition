@@ -1,4 +1,4 @@
-function rawData = acquireTrackballData
+function data = acquireTrackballData
 
 %% Trackball settings
 %{
