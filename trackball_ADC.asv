@@ -1,6 +1,6 @@
 clear all
 close all
-load('C:\Users\Alex\Dropbox\PhD\Year2\DataTemp\ballCalibrationDataRand');
+load('C:\Users\Alex\Dropbox\PhD\Year2\DataTemp\ballCalibrationData');
 
 sensorRes  = 8200;
 mmConv = 25.4;
@@ -54,81 +54,85 @@ plot(transInd,transVals,'go')
 %%
 % Subtract offset 
 transVals = transVals - offset;
-
 figure
 plot(transVals)
 
 % Convert counts to mm 
 transVals = mmPerCount.*transVals;
+figure
+plot(transVals,'.')
 
 % Calculate cumulative changes 
-cumVals = cumsum(transVals);
+cumVals = cumsum(transVals(114:end));
 
 figure
-plot(cumVals)
-%% Check discretisation
-seqUnrounded = (rawData(:,1) - minVal)./intVal;
-
-figure
-plot(seq,'g')
-hold on
-plot(seqUnrounded,'r')
-
-%% Check mm conversion 
-
-
-%% See where steps of only 1 occur 
-oneStepInd = find(diff(seq) == -1);
-figure
-plot(seq,'g')
-hold on
-plot(seqUnrounded,'b')
+plot(transVals(114:end),'.')
 hold on 
-plot(oneStepInd,seq(oneStepInd),'ro')
+plot(cumVals,'g.')
 
-%% Check what differences between steps look like 
-figure
-plot(rawData(:,1),'g')
-hold on
-plot(diff(seq))
-unique(diff(seq))
-
-%% Check removal of too short transitions 
-figure
-hist(indSep,100)
-title('indSep1')
-
-figure 
-plot(seq,'g')
-hold on
-plot(transInd,seq(transInd),'ro')
-
-%% Add extra transitions when transitions are too long
-
-
-figure
-hist(indSep2,100)
-title('indSep2')
-
-figure 
-plot(seq,'g')
-hold on
-plot(transInd,seq(transInd),'ro')
-
-%%
-
-
-figure 
-plot(seq,'g')
-hold on
-plot(transInd,seq(transInd),'bo')
-hold on
-plot(highInd,seq(highInd)+0.1,'ro');
-hold on 
-plot(newInd,seq(newInd),'mo');
-
-%%
-figure
-plot(dataDiff)
-hold on 
-plot(seq - 137,'g')
+% %% Check discretisation
+% seqUnrounded = (rawData(:,1) - minVal)./intVal;
+% 
+% figure
+% plot(seq,'g')
+% hold on
+% plot(seqUnrounded,'r')
+% 
+% %% Check mm conversion 
+% 
+% 
+% %% See where steps of only 1 occur 
+% oneStepInd = find(diff(seq) == -1);
+% figure
+% plot(seq,'g')
+% hold on
+% plot(seqUnrounded,'b')
+% hold on 
+% plot(oneStepInd,seq(oneStepInd),'ro')
+% 
+% %% Check what differences between steps look like 
+% figure
+% plot(rawData(:,1),'g')
+% hold on
+% plot(diff(seq))
+% unique(diff(seq))
+% 
+% %% Check removal of too short transitions 
+% figure
+% hist(indSep,100)
+% title('indSep1')
+% 
+% figure 
+% plot(seq,'g')
+% hold on
+% plot(transInd,seq(transInd),'ro')
+% 
+% %% Add extra transitions when transitions are too long
+% 
+% 
+% figure
+% hist(indSep2,100)
+% title('indSep2')
+% 
+% figure 
+% plot(seq,'g')
+% hold on
+% plot(transInd,seq(transInd),'ro')
+% 
+% %%
+% 
+% 
+% figure 
+% plot(seq,'g')
+% hold on
+% plot(transInd,seq(transInd),'bo')
+% hold on
+% plot(highInd,seq(highInd)+0.1,'ro');
+% hold on 
+% plot(newInd,seq(newInd),'mo');
+% 
+% %%
+% figure
+% plot(dataDiff)
+% hold on 
+% plot(seq - 137,'g')

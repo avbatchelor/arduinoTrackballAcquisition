@@ -243,10 +243,10 @@ int convTwosComp(int b){
   }
   
   void loop() {
-    for(int x = 0; x < 4096; x = x + 15){
-      randNumber = random(0, 274);
-      analogWrite(xOutPin,randNumber*15);
-      analogWrite(yOutPin,randNumber*15);
+    for(int x = 15; x < 4096; x = x + 15){
+      randNumber = random(1, 274);
+      analogWrite(xOutPin,x);
+      analogWrite(yOutPin,x);
       Serial.println(randNumber);
     }
       

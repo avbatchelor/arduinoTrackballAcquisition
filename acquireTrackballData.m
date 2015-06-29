@@ -55,18 +55,18 @@ subplot(2,1,2)
 plot(time,rawData(:,2))
 title('y')
 
-%% Plot processed data
-for i = 1:length(rawData,2)
-    smoothedData(:,i) = smooth(rawData(:,i),5);
-    discData(:,i) = round((smoothedData(:,i) - minVal)./intVal);
-    discDataMm(:,i) = mmPerCount.*(discData(:,i) - (numInts/2));
-    dataOut(:,i) = cumsum(discDataMm(:,i); 
-end
-
-figure
-subplot(2,1,1) 
-plot(time,dataOut(:,1))
-title('x')
-subplot(2,1,2)
-plot(time,dataOut(:,2))
-title('y')
+% %% Plot processed data
+% for i = 1:length(rawData,2)
+%     smoothedData(:,i) = smooth(rawData(:,i),5);
+%     discData(:,i) = round((smoothedData(:,i) - minVal)./intVal);
+%     discDataMm(:,i) = mmPerCount.*(discData(:,i) - (numInts/2));
+%     dataOut(:,i) = cumsum(discDataMm(:,i); 
+% end
+% 
+% figure
+% subplot(2,1,1) 
+% plot(time,dataOut(:,1))
+% title('x')
+% subplot(2,1,2)
+% plot(time,dataOut(:,2))
+% title('y')
