@@ -88,7 +88,7 @@ void setup() {
 
   performStartup();  
   delay(10);
-  Serial.println("ADNS9800testPolling");
+  ////Serial.println("ADNS9800testPolling");
   adns_write_reg(REG_Configuration_I, 0x29); // maximum resolution
   dispRegisters();
   delay(5000);
@@ -135,7 +135,7 @@ void adns_write_reg(byte reg_addr, byte data){
 
 void adns_upload_firmware(){
   // send the firmware to the chip, cf p.18 of the datasheet
-  Serial.println("Uploading firmware...");
+  ////Serial.println("Uploading firmware...");
   // set the configuration_IV register in 3k firmware mode
   adns_write_reg(REG_Configuration_IV, 0x02); // bit 1 = 1 for 3k mode, other bits are reserved 
   
@@ -188,7 +188,7 @@ void performStartup(void){
   
   delay(1);
 
-  Serial.println("Optical Chip Initialized");
+  ////Serial.println("Optical Chip Initialized");
   }
 
 void readXY(void){
@@ -221,12 +221,12 @@ void dispRegisters(void){
   for(rctr=0; rctr<4; rctr++){
     SPI.transfer(oreg[rctr]);
     delay(1);
-    Serial.println("---");
-    Serial.println(oregname[rctr]);
-    Serial.println(oreg[rctr],HEX);
+    ////Serial.println("---");
+    ////Serial.println(oregname[rctr]);
+    ////Serial.println(oreg[rctr],HEX);
     regres = SPI.transfer(0);
-    Serial.println(regres,BIN);  
-    Serial.println(regres,HEX);  
+    //Serial.println(regres,BIN);  
+    //Serial.println(regres,HEX);  
     delay(1);
   }
   digitalWrite(ncs,HIGH);
@@ -254,16 +254,18 @@ int convTwosComp(int b){
     remY = (cumY % 137) + 137;
     remX = remX * 15; 
     remY = remY * 15;
-        Serial.print("currTime");            
-        Serial.print(currTime);
-        Serial.print(" | ");  
-        Serial.print("x = ");
+        //Serial.print("currTime");            
+        //Serial.print(currTime);
+        //Serial.print(" | ");  
+        //Serial.print("x = ");
         Serial.print(xydat[0]);
-        Serial.print(" | ");
-        Serial.print("y = ");
-        Serial.println(xydat[1]);
-        analogWrite(xOutPin,remX); //has to be a number between 0 and 4095 - need to choose an appropriate gain to do this
-        analogWrite(yOutPin,remY); //has to be a number between 0 and 4095 - need to choose an appropriate gain to do this
+        Serial.print("|");
+        //Serial.print("y = ");
+        Serial.print(xydat[1]);
+        Serial.print("|");
+        Serial.println(currTime);
+        //analogWrite(xOutPin,remX); //has to be a number between 0 and 4095 - need to choose an appropriate gain to do this
+        //analogWrite(yOutPin,remY); //has to be a number between 0 and 4095 - need to choose an appropriate gain to do this
     //pollTimer = currTime + 10;  // Read from sensor every 10 milliseconds 
     //}
       
