@@ -1,3 +1,5 @@
+% Process trackball data to measure discretisation
+
 clear all
 close all
 load('C:\Users\Alex\Dropbox\PhD\Year2\DataTemp\ballCalibrationData');
