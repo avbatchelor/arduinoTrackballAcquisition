@@ -1,15 +1,18 @@
 // Import libraries
 #include <SPI.h>
 #include <avr/pgmspace.h>
-#include <clockwork.h>
+#include <Wire.h> //Include the Wire library to talk I2C
 
-byte initComplete=0;
+#define MCP4725_ADDR_1 0x60    //first dac i2c address
+#define MCP4725_ADDR_2 0x61    //second dac i2c address
+
+byte initComplete = 0;
 volatile int xydat[2];
-volatile byte movementflag=0;
+volatile byte movementflag = 0;
 const int ncs = 51;
 const int mot = 53;
 const int xOutPin = DAC0;
-const int yOutPin = DAC1; 
+const int yOutPin = DAC1;
 byte xH;
 byte xL;
 byte yH;
@@ -18,9 +21,9 @@ byte Motion;
 const int aWriteRes = 12;
 unsigned long currTime;
 unsigned long pollTimer;
-long cumX; 
+long cumX;
 long cumY;
-int remX; 
+int remX;
 int remY;
 unsigned int testDat;
 
@@ -75,46 +78,53 @@ extern const unsigned short firmware_length;
 extern prog_uchar firmware_data[];
 
 void setup() {
-  Serial.begin(9600);
-  
+  Serial.begin(9600); //prepare for usb communication with computer
+
+  Wire.begin(); //prepare for i2c communication with DACs
+
+  pinMode(A0, OUTPUT);
+  pinMode(A1, OUTPUT);
+  digitalWrite(A0, HIGH);//Set A3 as Vcc
+  digitalWrite(A1, LOW);//Set A2 as GND
+
   pinMode (ncs, OUTPUT);
   pinMode (mot, INPUT);
-  analogWriteResolution(aWriteRes); 
-  
+  analogWriteResolution(aWriteRes);
+
   //attachInterrupt(mot, readXY, FALLING);
-  
+
   SPI.begin();
   SPI.setDataMode(SPI_MODE3);
   SPI.setBitOrder(MSBFIRST);
   SPI.setClockDivider(42);
 
-  performStartup();  
+  performStartup();
   delay(10);
   ////Serial.println("ADNS9800testPolling");
   adns_write_reg(REG_Configuration_I, 0x29); // maximum resolution
   dispRegisters();
   delay(5000);
-  initComplete=9;
+  initComplete = 9;
 
 }
 
-void adns_com_begin(){
+void adns_com_begin() {
   digitalWrite(ncs, LOW);
 }
 
-void adns_com_end(){
+void adns_com_end() {
   digitalWrite(ncs, HIGH);
 }
 
-byte adns_read_reg(byte reg_addr){
+byte adns_read_reg(byte reg_addr) {
   adns_com_begin();
-  
+
   // send adress of the register, with MSBit = 0 to indicate it's a read
   SPI.transfer(reg_addr & 0x7f );
   delayMicroseconds(100); // tSRAD
   // read data
   byte data = SPI.transfer(0);
-  
+
   delayMicroseconds(1); // tSCLK-NCS for read operation is 120ns
   adns_com_end();
   delayMicroseconds(19); //  tSRW/tSRR (=20us) minus tSCLK-NCS
@@ -122,51 +132,51 @@ byte adns_read_reg(byte reg_addr){
   return data;
 }
 
-void adns_write_reg(byte reg_addr, byte data){
+void adns_write_reg(byte reg_addr, byte data) {
   adns_com_begin();
-  
+
   //send adress of the register, with MSBit = 1 to indicate it's a write
   SPI.transfer(reg_addr | 0x80 );
   //sent data
   SPI.transfer(data);
-  
+
   delayMicroseconds(20); // tSCLK-NCS for write operation
   adns_com_end();
-  delayMicroseconds(100); // tSWW/tSWR (=120us) minus tSCLK-NCS. Could be shortened, but is looks like a safe lower bound 
+  delayMicroseconds(100); // tSWW/tSWR (=120us) minus tSCLK-NCS. Could be shortened, but is looks like a safe lower bound
 }
 
-void adns_upload_firmware(){
+void adns_upload_firmware() {
   // send the firmware to the chip, cf p.18 of the datasheet
   ////Serial.println("Uploading firmware...");
   // set the configuration_IV register in 3k firmware mode
-  adns_write_reg(REG_Configuration_IV, 0x02); // bit 1 = 1 for 3k mode, other bits are reserved 
-  
+  adns_write_reg(REG_Configuration_IV, 0x02); // bit 1 = 1 for 3k mode, other bits are reserved
+
   // write 0x1d in SROM_enable reg for initializing
-  adns_write_reg(REG_SROM_Enable, 0x1d); 
-  
+  adns_write_reg(REG_SROM_Enable, 0x1d);
+
   // wait for more than one frame period
   delay(10); // assume that the frame rate is as low as 100fps... even if it should never be that low
-  
+
   // write 0x18 to SROM_enable to start SROM download
-  adns_write_reg(REG_SROM_Enable, 0x18); 
-  
-  // write the SROM file (=firmware data) 
+  adns_write_reg(REG_SROM_Enable, 0x18);
+
+  // write the SROM file (=firmware data)
   adns_com_begin();
   SPI.transfer(REG_SROM_Load_Burst | 0x80); // write burst destination adress
   delayMicroseconds(15);
-  
+
   // send all bytes of the firmware
   unsigned char c;
-  for(int i = 0; i < firmware_length; i++){ 
+  for (int i = 0; i < firmware_length; i++) {
     c = (unsigned char)pgm_read_byte(firmware_data + i);
     SPI.transfer(c);
     delayMicroseconds(15);
   }
   adns_com_end();
-  }
+}
 
 
-void performStartup(void){
+void performStartup(void) {
   adns_com_end(); // ensure that the serial port is reset
   adns_com_begin(); // ensure that the serial port is reset
   adns_com_end(); // ensure that the serial port is reset
@@ -187,98 +197,92 @@ void performStartup(void){
   // change the reserved bytes (like by writing 0x00...) it would not work.
   byte laser_ctrl0 = adns_read_reg(REG_LASER_CTRL0);
   adns_write_reg(REG_LASER_CTRL0, laser_ctrl0 & 0xf0 );
-  
+
   delay(1);
 
   ////Serial.println("Optical Chip Initialized");
-  }
+}
 
-void readXY(void){
-  if(initComplete==9){
+void readXY(void) {
+  if (initComplete == 9) {
 
-    digitalWrite(ncs,LOW);
-    Motion = (adns_read_reg(REG_Motion) & (1 << 8-1)) != 0;
+    digitalWrite(ncs, LOW);
+    Motion = (adns_read_reg(REG_Motion) & (1 << 8 - 1)) != 0;
     xL = (int)adns_read_reg(REG_Delta_X_L);
     xH = (int)adns_read_reg(REG_Delta_X_H);
     yL = (int)adns_read_reg(REG_Delta_Y_L);
     yH = (int)adns_read_reg(REG_Delta_Y_H);
     xydat[0] = (xH << 8) + xL;
     xydat[1] = (yH << 8) + yL;
-    digitalWrite(ncs,HIGH);     
+    digitalWrite(ncs, HIGH);
 
     //movementflag=1;
-    }
   }
+}
 
-void dispRegisters(void){
+void dispRegisters(void) {
   int oreg[7] = {
-    0x00,0x3F,0x2A,0x02  };
+    0x00, 0x3F, 0x2A, 0x02
+  };
   char* oregname[] = {
-    "Product_ID","Inverse_Product_ID","SROM_Version","Motion"  };
+    "Product_ID", "Inverse_Product_ID", "SROM_Version", "Motion"
+  };
   byte regres;
 
-  digitalWrite(ncs,LOW);
+  digitalWrite(ncs, LOW);
 
-  int rctr=0;
-  for(rctr=0; rctr<4; rctr++){
+  int rctr = 0;
+  for (rctr = 0; rctr < 4; rctr++) {
     SPI.transfer(oreg[rctr]);
     delay(1);
     ////Serial.println("---");
     ////Serial.println(oregname[rctr]);
     ////Serial.println(oreg[rctr],HEX);
     regres = SPI.transfer(0);
-    //Serial.println(regres,BIN);  
-    //Serial.println(regres,HEX);  
+    //Serial.println(regres,BIN);
+    //Serial.println(regres,HEX);
     delay(1);
   }
-  digitalWrite(ncs,HIGH);
+  digitalWrite(ncs, HIGH);
 }
 
 
-int convTwosComp(int b){
+int convTwosComp(int b) {
   //Convert from 2's complement
-  if(b & 0x8000){
+  if (b & 0x8000) {
     b = -1 * ((b ^ 0xffff) + 1);
-    }
+  }
   return b;
-  }
-
-void tet_warning(long t) {
-  Serial.print(t);
-  Serial.println(" TET warning!");
 }
 
-Clockwork cw(10, tet_warning);
 
-void loop() 
-{
+void loop() {
+  cw.start();   
+
+  //if(currTime > pollTimer){
+  //readXY();
+  //xydat[0] = convTwosComp(xydat[0]);
+  //xydat[1] = convTwosComp(xydat[1]);
+  testDat = 0;
+  int JUMP_VAL=1;
     
-    //if(currTime > pollTimer){
-    //readXY();
-    //xydat[0] = convTwosComp(xydat[0]);
-    //xydat[1] = convTwosComp(xydat[1]);
-
-  for (testDat = 15; testDat < 4081; testDat=testDat+30)  
+  for (testDat = 0; testDat < 4096; testDat=testDat+JUMP_VAL) 
+  //for (testDat = 0; testDat >= 0; testDat=testDat-JUMP_VAL) 
   {
-        cw.start();
-        analogWrite(xOutPin,testDat); //has to be a number between 0 and 4095 - need to choose an appropriate gain to do this
-        analogWrite(yOutPin,testDat); //has to be a number between 0 and 4095 - need to choose an appropriate gain to do this
-        cw.stop();
+    int testDat1 = random(1, 254);
+    Wire.beginTransmission(MCP4725_ADDR_1);
+    Wire.write(64);                     // cmd to update the DAC
+    //Wire.write( testDat );
+    Wire.write(testDat1 >> 4);        // the 8 most significant bits...
+    Wire.write((testDat1 & 15) << 4); // the 4 least significant bits...
+    int rc = Wire.endTransmission();
+    if (rc != 0)
+    {
+      Serial.print("ERROR:: Wire.endTransmission returned: ");
+      Serial.println(rc);
+    }
   }
-        //Serial.print("currTime");            
-        //Serial.print(currTime);
-        //Serial.print(" | ");  
-        //Serial.print("x = ");
-        //Serial.print(xydat[0]);
-        //Serial.print("|");
-        //Serial.print("y = ");
-        //Serial.print(xydat[1]);
-        //Serial.print("|");
-        //Serial.println(currTime);
-        
-    //pollTimer = currTime + 10;  // Read from sensor every 10 milliseconds 
-    //}
-      
+  cw.stop();  
 }
- 
+
 

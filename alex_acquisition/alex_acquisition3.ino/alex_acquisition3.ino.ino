@@ -3,6 +3,9 @@
 #include <avr/pgmspace.h>
 #include <Wire.h> //Include the Wire library to talk I2C
 
+#include <clockwork.h>
+
+
 #define MCP4725_ADDR_1 0x60    //first dac i2c address
 #define MCP4725_ADDR_2 0x61    //second dac i2c address
 
@@ -82,10 +85,10 @@ void setup() {
 
   Wire.begin(); //prepare for i2c communication with DACs
 
-  //pinMode(A0, OUTPUT);
-  //pinMode(A1, OUTPUT);
-  //digitalWrite(A0, HIGH);//Set A3 as Vcc
-  //digitalWrite(A1, LOW);//Set A2 as GND
+  pinMode(A0, OUTPUT);
+  pinMode(A1, OUTPUT);
+  digitalWrite(A0, HIGH);//Set A3 as Vcc
+  digitalWrite(A1, LOW);//Set A2 as GND
 
   pinMode (ncs, OUTPUT);
   pinMode (mot, INPUT);
@@ -255,25 +258,64 @@ int convTwosComp(int b) {
   return b;
 }
 
+void tet_warning(long t) {
+  Serial.print(t);
+  Serial.println(" TET warning!");
+}
+
+unsigned long microIdx = 0;
+#define ARRAY_SIZE  1000
+unsigned long microArray[ ARRAY_SIZE ]; 
+Clockwork cw(50,tet_warning);
+
 void loop() {
+  cw.start();  
+    
   currTime = micros();
+  Serial.println( currTime );    
+if (0)
+{
+ if(microIdx < ARRAY_SIZE)
+    {
+      microArray[ microIdx ] = currTime;
+      microIdx = microIdx + 1;
+    }
+    else if( microIdx == ARRAY_SIZE )
+    {      
+      for(int i=0; i<ARRAY_SIZE; i++)
+      {
+      Serial.print("time[ ");
+      Serial.print(i);
+      Serial.print(" ]: ");
+      Serial.println( microArray[ i ] );    
+      }
+    }
+}
 
   //if(currTime > pollTimer){
   readXY();
   xydat[0] = convTwosComp(xydat[0]);
   xydat[1] = convTwosComp(xydat[1]);
   testDat = 0;
-  int JUMP_VAL=15;
-
-  for (testDat = 0; testDat < 4096; testDat=testDat+JUMP_VAL) {
+  int JUMP_VAL=1;
+    
+  for (testDat = 0; testDat < 4096; testDat=testDat+JUMP_VAL) 
+  //for (testDat = 0; testDat >= 0; testDat=testDat-JUMP_VAL) 
+  {
+    int testDat1 = random(1, 254);
     Wire.beginTransmission(MCP4725_ADDR_1);
     Wire.write(64);                     // cmd to update the DAC
-    Wire.write(testDat >> 4);        // the 8 most significant bits...
-    Wire.write((testDat & 15) << 4); // the 4 least significant bits...
-    Wire.endTransmission();
-    delay(100);
+    //Wire.write( testDat );
+    Wire.write(testDat1 >> 4);        // the 8 most significant bits...
+    Wire.write((testDat1 & 15) << 4); // the 4 least significant bits...
+    int rc = Wire.endTransmission();
+    if (rc != 0)
+    {
+      Serial.print("ERROR:: Wire.endTransmission returned: ");
+      Serial.println(rc);
+    }
   }
-
+  cw.stop();  
 }
 
 

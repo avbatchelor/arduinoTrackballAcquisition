@@ -1,7 +1,6 @@
 // Import libraries
 #include <SPI.h>
 #include <avr/pgmspace.h>
-#include <clockwork.h>
 
 byte initComplete=0;
 volatile int xydat[2];
@@ -15,14 +14,10 @@ byte xL;
 byte yH;
 byte yL;
 byte Motion;
-const int aWriteRes = 12;
 unsigned long currTime;
 unsigned long pollTimer;
-long cumX; 
-long cumY;
-int remX; 
-int remY;
-unsigned int testDat;
+int xPwmPin = 2; 
+int yPwmPin = 3; 
 
 // Registers
 #define REG_Product_ID                           0x00
@@ -79,7 +74,8 @@ void setup() {
   
   pinMode (ncs, OUTPUT);
   pinMode (mot, INPUT);
-  analogWriteResolution(aWriteRes); 
+  pinMode(xPwmPin, OUTPUT);   
+  pinMode(yPwmPin, OUTPUT);   
   
   //attachInterrupt(mot, readXY, FALLING);
   
@@ -243,42 +239,64 @@ int convTwosComp(int b){
   return b;
   }
 
-void tet_warning(long t) {
-  Serial.print(t);
-  Serial.println(" TET warning!");
-}
+unsigned long microIdx = 0;
+#define ARRAY_SIZE  1000
+unsigned long microArray[ ARRAY_SIZE ]; 
 
-Clockwork cw(10, tet_warning);
-
-void loop() 
-{
+Clockwork cw(10);
+  
+  void loop() {
+    currTime = micros();
     
-    //if(currTime > pollTimer){
-    //readXY();
-    //xydat[0] = convTwosComp(xydat[0]);
-    //xydat[1] = convTwosComp(xydat[1]);
+    if(microIdx < ARRAY_SIZE)
+    {
+      microArray[ microIdx ] = currTime;
+      microIdx = microIdx + 1;
+    }
+    else if( microIdx == ARRAY_SIZE )
+    {
+      for(int i=0; i<ARRAY_SIZE; i++)
+      {
+      Serial.print("time[ ");
+      Serial.print(i);
+      Serial.print(" ]: ");
+      Serial.println( microArray[ i ] );    
+      }
+    }
 
-  for (testDat = 15; testDat < 4081; testDat=testDat+30)  
-  {
-        cw.start();
-        analogWrite(xOutPin,testDat); //has to be a number between 0 and 4095 - need to choose an appropriate gain to do this
-        analogWrite(yOutPin,testDat); //has to be a number between 0 and 4095 - need to choose an appropriate gain to do this
-        cw.stop();
-  }
-        //Serial.print("currTime");            
-        //Serial.print(currTime);
-        //Serial.print(" | ");  
-        //Serial.print("x = ");
-        //Serial.print(xydat[0]);
-        //Serial.print("|");
-        //Serial.print("y = ");
-        //Serial.print(xydat[1]);
-        //Serial.print("|");
-        //Serial.println(currTime);
-        
-    //pollTimer = currTime + 10;  // Read from sensor every 10 milliseconds 
-    //}
+    
+    if(currTime > pollTimer){
+    readXY();
+    xydat[0] = convTwosComp(xydat[0]);
+    xydat[1] = convTwosComp(xydat[1]);
+    xydat[0] = xydat[0] + 128;
+    xydat[1] = xydat[1] + 128;
+    if (xydat[0] > 254)
+    {
+      xydat[0] = 254; 
+    }
+    if (xydat[0] < 2)
+    {
+      xydat[0] = 2; 
+    }
+    if (xydat[1] > 254)
+    {
+      xydat[1] = 254; 
+    }
+    if (xydat[1] < 2)
+    {
+      xydat[1] = 2; 
+    }
+    analogWrite(xPwmPin,xydat[0]);
+    analogWrite(yPwmPin,xydat[1]);
+    //Serial.print("x = ");
+    //Serial.print(xydat[0]);
+    //Serial.print("|");
+    //Serial.print("y = ");
+    //Serial.println(xydat[1]);
+    pollTimer = currTime + 10;  // Read from sensor every 10 milliseconds 
+    }
       
-}
+  }
  
 
