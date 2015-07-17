@@ -19,14 +19,14 @@ maxVal = 2.7819;
 numInts = 274;
 
 Dur = 10;
-sampRate = 10e3;
+sampRate = 40e3;
 
 %% Calculated parameters 
 intVal = (maxVal - minVal)/(numInts-1);
 mmPerCount = 25.4/8200; 
 
 %% Load settings
-inChannelsUsed = 0;
+inChannelsUsed =0:1;
 
 %% Configure daq
 % daqreset;
@@ -50,12 +50,15 @@ sIn.stop;
 %% Plot data
 time = [1/sampRate:1/sampRate:Dur];
 figure()
+h(1) = subplot(2,1,1);
 plot(time,rawData(:,1))
 title('x')
 
-% figure()
-% plot(time,rawData(:,2))
-% title('y')
+h(2) = subplot(2,1,2);
+plot(time,rawData(:,2));
+title('y')
+
+linkaxes(h(:))
 
 % %% Plot processed data
 % for i = 1:length(rawData,2)
