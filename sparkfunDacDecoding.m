@@ -63,6 +63,13 @@ function seq = findSeq(rawData,minVal,maxVal,numInts,axis,cutoffFreq)
 %     title(['Diff, ',axis,' axis'])
     
     
+% sensorRes  = 8200;
+% mmConv = 25.4;
+% intVal = (maxVal - minVal)/(numInts-1);
+% mmPerCount = 25.4/8200; 
+% minVal = 0.5607;
+% maxVal = 2.7819;
+% numInts = 274;
 
 
 end
