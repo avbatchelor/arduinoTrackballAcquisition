@@ -86,7 +86,7 @@ void setup() {
 
   performStartup();
   delay(10);
-  ////Serial.println("ADNS9800testPolling");
+  Serial.println("ADNS9800testPolling");
   adns_write_reg(REG_Configuration_I, 0x29); // maximum resolution
   dispRegisters();
   delay(5000);
@@ -133,7 +133,7 @@ void adns_write_reg(byte reg_addr, byte data) {
 
 void adns_upload_firmware() {
   // send the firmware to the chip, cf p.18 of the datasheet
-  ////Serial.println("Uploading firmware...");
+  Serial.println("Uploading firmware...");
   // set the configuration_IV register in 3k firmware mode
   adns_write_reg(REG_Configuration_IV, 0x02); // bit 1 = 1 for 3k mode, other bits are reserved
 
@@ -186,7 +186,7 @@ void performStartup(void) {
 
   delay(1);
 
-  ////Serial.println("Optical Chip Initialized");
+  Serial.println("Optical Chip Initialized");
 }
 
 void readXY(void) {
@@ -221,12 +221,12 @@ void dispRegisters(void) {
   for (rctr = 0; rctr < 4; rctr++) {
     SPI.transfer(oreg[rctr]);
     delay(1);
-    ////Serial.println("---");
-    ////Serial.println(oregname[rctr]);
-    ////Serial.println(oreg[rctr],HEX);
+    Serial.println("---");
+    Serial.println(oregname[rctr]);
+    Serial.println(oreg[rctr],HEX);
     regres = SPI.transfer(0);
-    //Serial.println(regres,BIN);
-    //Serial.println(regres,HEX);
+    Serial.println(regres,BIN);
+    Serial.println(regres,HEX);
     delay(1);
   }
   digitalWrite(ncs, HIGH);
@@ -256,7 +256,20 @@ void loop()
   xydat[1] = convTwosComp(xydat[1]);
   wireOut[0] = 2041+(xydat[0]*15);
   wireOut[1] = 2041+(xydat[1]*15);
-  /*
+  if (wireOut[0] > 4066) {
+    wireOut[0] = 4066; 
+  }
+  if (wireOut[0] < 16) {
+    wireOut[0] = 16; 
+  }
+  if (wireOut[1] > 4066) {
+    wireOut[1] = 4066; 
+  }
+  if (wireOut[1] < 16) {
+    wireOut[1] = 16; 
+  }  
+
+ /*
   Serial.print("X Dat: "); 
   Serial.print(xydat[0]); 
   Serial.print("Y Dat: "); 
@@ -266,6 +279,9 @@ void loop()
   Serial.print("Y Wire: "); 
   Serial.println(wireOut[1]);
   */
+  wireOut[0] = 2041; 
+  wireOut[1] = 2041;
+  
   Wire.beginTransmission(MCP4725_ADDR_1);
   Wire.write(64);                     // cmd to update the DAC
   Wire.write(wireOut[0] >> 4);        // the 8 most significant bits...

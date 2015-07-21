@@ -23,11 +23,11 @@ void tet_warning(long t) {
 Clockwork cw(10,tet_warning);
 
 void loop() {
-  //for (testDat1 = 16; testDat1 < 4067; testDat1=testDat1+15)  {
+  for (testDat1 = 16; testDat1 < 4067; testDat1=testDat1+15)  {
   
     cw.start();  
-    testDat1 = random(1,271);
-    testDat1 = 1 + (testDat1*15);
+    //testDat1 = random(1,271);
+    //testDat1 = 1 + (testDat1*15);
     Wire.beginTransmission(MCP4725_ADDR_1);
     Wire.write(64);                     // cmd to update the DAC
     Wire.write(testDat1 >> 4);        // the 8 most significant bits...
@@ -53,7 +53,7 @@ void loop() {
       }
      
     cw.stop(); 
-  //}
+  }
 }
 
 
