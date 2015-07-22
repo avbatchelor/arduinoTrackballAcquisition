@@ -279,8 +279,6 @@ void loop()
   Serial.print("Y Wire: "); 
   Serial.println(wireOut[1]);
   */
-  wireOut[0] = 2041; 
-  wireOut[1] = 2041;
   
   Wire.beginTransmission(MCP4725_ADDR_1);
   Wire.write(64);                     // cmd to update the DAC
