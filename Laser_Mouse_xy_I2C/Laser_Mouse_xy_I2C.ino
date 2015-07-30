@@ -65,7 +65,7 @@ int16_t * x = (int16_t *) &xydat[0];
 int16_t * y = (int16_t *) &xydat[2];
 
 volatile byte movementflag=0;
-const int ncs = 10;
+const int ncs = 51;
 
 int m = 5; //for monitoring max (remove after some testing)
 
@@ -256,7 +256,7 @@ void loop() {
     
     /*** moved from registered interrupt ***/
     digitalWrite(ncs,LOW);
-    
+    /*
     //also modified from the int array to fix read issues (in comments of instructable)
     xydat[0] = (byte)adns_read_reg(REG_Delta_X_L);
     xydat[1] = (byte)adns_read_reg(REG_Delta_X_H);
@@ -265,37 +265,31 @@ void loop() {
     
     digitalWrite(ncs,HIGH);     
     /*** end moved code ***/
-    
-    Serial.println(m);
-    Serial.println(map(*x, -m, m, 0, 4095));
-    Serial.println(map(*y, -m, m, 0, 4095));
+
+  /*
+    Serial.print("X ");
+    Serial.print(*x);
+    Serial.print("Y ");
+    Serial.println(*y);
     
     Wire.beginTransmission(MCP4725_ADDR_1);
     Wire.write(64);                     // cmd to update the DAC
-    Wire.write(map(*x, -m, m, 0, 4095) >> 4);        // the 8 most significant bits...
-    Wire.write((map(*x, -m, m, 0, 4095) & 15) << 4); // the 4 least significant bits...
+    Wire.write(*x >> 4);        // the 8 most significant bits...
+    Wire.write((*x & 15) << 4); // the 4 least significant bits...
     Wire.endTransmission();
     
     
     Wire.beginTransmission(MCP4725_ADDR_2);
     Wire.write(64);                     // cmd to update the DAC
-    Wire.write(map(*y, -m, m, 0, 4095)  >> 4);        // the 8 most significant bits...
-    Wire.write((map(*y, -m, m, 0, 4095) & 15) << 4); // the 4 least significant bits...
+    Wire.write(*y  >> 4);        // the 8 most significant bits...
+    Wire.write((*y & 15) << 4); // the 4 least significant bits...
     Wire.endTransmission();
   
-  
-    if(abs(*x) > m){
-      m = abs(*x);
-      Serial.println(m);
-    } else if (abs(*y) > m){
-      m = abs(*y);
-      Serial.println(m);    
-    }
     
     movementflag=0;
     //delayMicroseconds(500);
     delay(1);
-    
+    */
     
   //} //END COMMENTED IF
 }

@@ -7,24 +7,21 @@ resolution  = 8200cpi
 allow for gain 
 
 %}
+close all
 fprintf('\n*********** Acquiring Trial ***********\n') 
 
-sensorRes  = 8200; 
-mmConv = 25.4;
-
-
-
 %% Load settings    
-inChannelsUsed = 8:9;
+inChannelsUsed = 0:1;
      
 %% Configure daq
 % daqreset;
 devID = 'Dev1';
+sampRate = 40E3;
 
 %% Configure input session
 sIn = daq.createSession('ni');
-sIn.Rate = 10E3;
-sIn.DurationInSeconds = 10;
+sIn.Rate = sampRate;
+sIn.DurationInSeconds = 60;
 
 aI = sIn.addAnalogInputChannel(devID,inChannelsUsed,'Voltage');
 for i = 1:length(inChannelsUsed)
@@ -35,21 +32,35 @@ end
 lh = sIn.addlistener('DataAvailable', @plotData);
 
     function plotData(~,event) 
-        offset = (1/6)*3.3;
-        gain = (4/6)* 3.3 * 4095;
+        settings = ballSettings; 
+        [vel(:,1),disp(:,1)] = getVel(event.Data(:,1),settings.xMinVal,settings.xMaxVal,settings,sampRate);
+        [vel(:,2),disp(:,2)] = getVel(event.Data(:,2),settings.yMinVal,settings.yMaxVal,settings,sampRate);
         figure(1)
 %        plot(event.TimeStamps, cumsum((event.Data-2048).*mmConv./sensorRes))
-        subplot(2,1,1)
-        plot(event.TimeStamps, (event.Data(:,1) - offset).*gain)
-        title('x')
-        subplot(2,1,2)
-        plot(event.TimeStamps, (event.Data(:,2) - offset).*gain)
-        title('y')
+        subplot(4,1,1)
+        plot(event.TimeStamps, vel(:,1))
+%         plot(event.TimeStamps, event.Data(:,1))
+        hold on 
+        title('Vx')
+        subplot(4,1,2)
+        plot(event.TimeStamps, vel(:,2))
+%         plot(event.TimeStamps, event.Data(:,2))
+        hold on 
+        title('Vy')
+        subplot(4,1,3)
+        plot(event.TimeStamps, disp(:,1))
+        hold on 
+        title('X Disp')
+        subplot(4,1,4)
+        plot(event.TimeStamps, disp(:,2))
+        hold on 
+        title('Y Disp')
+        
     end
 
 
 %% Run trials
-sIn.NotifyWhenDataAvailableExceeds = 10*10e3;
+sIn.NotifyWhenDataAvailableExceeds = 0.1*sIn.Rate;
 %sIn.IsNotifyWhenDataAvailableExceedsAuto
 
 sIn.startBackground;
