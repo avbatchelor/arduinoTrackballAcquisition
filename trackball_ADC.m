@@ -13,29 +13,29 @@ minVal = 0.5607;
 maxVal = 2.7819;
 offset = numInts/2;
 intVal = (maxVal - minVal)/(numInts - 1);
-mmPerCount = 25.4/8200; 
+mmPerCount = 25.4/8200;
 
-lowTransIndThresh = 20; 
-highTransIndThresh = 60; 
+lowTransIndThresh = 20;
+highTransIndThresh = 60;
 
 
-%% Process data 
+%% Process data
 % Discretise
 smoothedData = smooth(rawData(:,1),5);
 seq = round((smoothedData(:,1) - minVal)./intVal);
 
-% Find transitions 
+% Find transitions
 dataDiff = diff(seq);
 dataDiffBin = dataDiff~=0;
 transInd = findstr(dataDiffBin',[1,0]) + 1;
 indSep = diff(transInd);
 
-% Remove transitions that are too close together (these are artefacts) 
+% Remove transitions that are too close together (these are artefacts)
 transInd(indSep<lowTransIndThresh) = [];
 
-% Add an extra transition when the transition is too long 
+% Add an extra transition when the transition is too long
 indSep2 = diff(transInd);
-medSep = round(median(indSep2)); 
+medSep = round(median(indSep2));
 highInd = transInd(60<indSep2);
 while ~isempty(highInd)
     newInd = highInd+medSep;
@@ -44,95 +44,95 @@ while ~isempty(highInd)
     highInd = transInd(60<indSep2);
 end
 
-% Read out values at transitions 
-transVals = seq(transInd);  
+% Read out values at transitions
+transVals = seq(transInd);
 figure
 plot(seq)
-hold on 
+hold on
 plot(transInd,transVals,'go')
 
 %%
-% Subtract offset 
+% Subtract offset
 transVals = transVals - offset;
 figure
 plot(transVals)
 
-% Convert counts to mm 
+% Convert counts to mm
 transVals = mmPerCount.*transVals;
 figure
 plot(transVals,'.')
 
-% Calculate cumulative changes 
+% Calculate cumulative changes
 cumVals = cumsum(transVals);
 
 figure
 plot(transVals,'.')
-hold on 
+hold on
 plot(cumVals,'g.')
 
 % %% Check discretisation
 % seqUnrounded = (rawData(:,1) - minVal)./intVal;
-% 
+%
 % figure
 % plot(seq,'g')
 % hold on
 % plot(seqUnrounded,'r')
-% 
-% %% Check mm conversion 
-% 
-% 
-% %% See where steps of only 1 occur 
+%
+% %% Check mm conversion
+%
+%
+% %% See where steps of only 1 occur
 % oneStepInd = find(diff(seq) == -1);
 % figure
 % plot(seq,'g')
 % hold on
 % plot(seqUnrounded,'b')
-% hold on 
+% hold on
 % plot(oneStepInd,seq(oneStepInd),'ro')
-% 
-% %% Check what differences between steps look like 
+%
+% %% Check what differences between steps look like
 % figure
 % plot(rawData(:,1),'g')
 % hold on
 % plot(diff(seq))
 % unique(diff(seq))
-% 
-% %% Check removal of too short transitions 
+%
+% %% Check removal of too short transitions
 % figure
 % hist(indSep,100)
 % title('indSep1')
-% 
-% figure 
+%
+% figure
 % plot(seq,'g')
 % hold on
 % plot(transInd,seq(transInd),'ro')
-% 
+%
 % %% Add extra transitions when transitions are too long
-% 
-% 
+%
+%
 % figure
 % hist(indSep2,100)
 % title('indSep2')
-% 
-% figure 
+%
+% figure
 % plot(seq,'g')
 % hold on
 % plot(transInd,seq(transInd),'ro')
-% 
+%
 % %%
-% 
-% 
-% figure 
+%
+%
+% figure
 % plot(seq,'g')
 % hold on
 % plot(transInd,seq(transInd),'bo')
 % hold on
 % plot(highInd,seq(highInd)+0.1,'ro');
-% hold on 
+% hold on
 % plot(newInd,seq(newInd),'mo');
-% 
+%
 % %%
 % figure
 % plot(dataDiff)
-% hold on 
+% hold on
 % plot(seq - 137,'g')
