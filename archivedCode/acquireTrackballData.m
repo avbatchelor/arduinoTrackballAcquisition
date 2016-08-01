@@ -1,5 +1,7 @@
 function rawData = acquireTrackballData
 
+% For looking at raw data from trackball 
+
 %% Trackball settings
 %{
 resolution  = 8200cpi
@@ -10,21 +12,11 @@ allow for gain
 fprintf('\n*********** Acquiring Trial ***********\n')
 
 %% Hard coded parameters
-sensorRes  = 8200;
-mmConv = 25.4;
-minVal = 0.5607;
-maxVal = 2.7819;
-numInts = 274;
-
 Dur = 10;
-sampRate = 10e3;
-
-%% Calculated parameters 
-intVal = (maxVal - minVal)/(numInts-1);
-mmPerCount = 25.4/8200; 
+sampRate = 40e3;
 
 %% Load settings
-inChannelsUsed = 8:9;
+inChannelsUsed =0:1;
 
 %% Configure daq
 % daqreset;
@@ -48,12 +40,15 @@ sIn.stop;
 %% Plot data
 time = [1/sampRate:1/sampRate:Dur];
 figure()
-subplot(2,1,1)
+h(1) = subplot(2,1,1);
 plot(time,rawData(:,1))
 title('x')
-subplot(2,1,2)
-plot(time,rawData(:,2))
+
+h(2) = subplot(2,1,2);
+plot(time,rawData(:,2));
 title('y')
+
+linkaxes(h(:))
 
 % %% Plot processed data
 % for i = 1:length(rawData,2)
