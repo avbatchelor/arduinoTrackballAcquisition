@@ -26,11 +26,12 @@ Clockwork cw(10, tet_warning);
 
 void loop() 
 {
-  for (testDat = 15; testDat < 4081; testDat=testDat+30)  
+  for (testDat = 16; testDat < 4067; testDat=testDat+15)  
   {
         cw.start();
         analogWrite(xOutPin,testDat); //has to be a number between 0 and 4095 - need to choose an appropriate gain to do this
         analogWrite(yOutPin,testDat); //has to be a number between 0 and 4095 - need to choose an appropriate gain to do this
+        Serial.println(testDat);
         cw.stop();
   }   
 }

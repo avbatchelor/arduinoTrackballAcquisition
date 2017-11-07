@@ -1,6 +1,10 @@
-function rawData = acquireTrackballData
+%% acquireTrackballData
 
 % For looking at raw data from trackball 
+
+clear all 
+close all
+
 
 %% Trackball settings
 %{
@@ -43,10 +47,14 @@ figure()
 h(1) = subplot(2,1,1);
 plot(time,rawData(:,1))
 title('x')
+xlabel('Time (s)')
+ylabel('Voltage (V)')
 
 h(2) = subplot(2,1,2);
 plot(time,rawData(:,2));
 title('y')
+xlabel('Time (s)')
+ylabel('Voltage (V)')
 
 linkaxes(h(:))
 
@@ -55,7 +63,7 @@ linkaxes(h(:))
 %     smoothedData(:,i) = smooth(rawData(:,i),5);
 %     discData(:,i) = round((smoothedData(:,i) - minVal)./intVal);
 %     discDataMm(:,i) = mmPerCount.*(discData(:,i) - (numInts/2));
-%     dataOut(:,i) = cumsum(discDataMm(:,i); 
+%     dataOut(:,i) = cumsum(discDataMm(:,i)); 
 % end
 % 
 % figure
