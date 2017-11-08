@@ -81,7 +81,7 @@ ylabel('Voltage (V)')
 h(2) = subplot(2,1,2);
 hold on 
 plot(time,rawData(:,2)-settings.yMinVal);
-plot(time,smoothedData(:,2)-settings.yMinVa,'r');
+plot(time,smoothedData(:,2)-settings.yMinVal,'r');
 plot(time,seq(:,2)*yVoltsPerStep,'g');
 plot(time,seq2(:,2)*xVoltsPerStep,'k')
 title('y')

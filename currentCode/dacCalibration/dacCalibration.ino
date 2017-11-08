@@ -298,8 +298,8 @@ void loop()
         int testNum;
         randNumber = random(1, 271);
         testNum = 1+15*randNumber;
-        wireOut[0] = testNum; 
-        wireOut[1] = testNum; 
+        wireOut[0] = 2041; 
+        wireOut[1] = 2041; 
         Serial.println(testNum);
         cw.stop();
 
