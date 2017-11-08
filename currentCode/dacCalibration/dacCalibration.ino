@@ -294,9 +294,13 @@ void loop()
   for (testDat = 16; testDat < 4067; testDat=testDat+15)  
   {
         cw.start();
-        wireOut[0] = 2041; 
-        wireOut[1] = testDat; 
-        Serial.println(testDat);
+        int randNumber;
+        int testNum;
+        randNumber = random(1, 271);
+        testNum = 1+15*randNumber;
+        wireOut[0] = testNum; 
+        wireOut[1] = testNum; 
+        Serial.println(testNum);
         cw.stop();
 
         Wire.beginTransmission(MCP4725_ADDR_1);
