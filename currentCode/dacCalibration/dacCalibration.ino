@@ -298,9 +298,9 @@ void loop()
         int testNum;
         randNumber = random(1, 271);
         testNum = 1+15*randNumber;
-        wireOut[0] = 2041; 
-        wireOut[1] = 2041; 
-        Serial.println(testNum);
+        wireOut[0] = testDat; 
+        wireOut[1] = testDat; 
+        Serial.println(testDat);
         cw.stop();
 
         Wire.beginTransmission(MCP4725_ADDR_1);

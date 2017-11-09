@@ -41,6 +41,8 @@ rawData = sIn.startForeground;
 %% Close daq objects
 sIn.stop;
 
+%% Process ball data
+
 %% Smooth data 
 settings = ballSettings; 
 rate = 2*(settings.cutoffFreq/settings.sampRate);
@@ -67,7 +69,7 @@ seq2(seq<0) = 0;
 
 %% Plot data in volts
 time = [1/sampRate:1/sampRate:Dur];
-figure()
+figure(1)
 h(1) = subplot(2,1,1);
 hold on 
 plot(time,rawData(:,1)-settings.xMinVal)
@@ -92,7 +94,7 @@ linkaxes(h(:))
 
 %% Plot data in steps
 time = [1/sampRate:1/sampRate:Dur];
-figure()
+figure(2)
 h(1) = subplot(2,1,1);
 hold on 
 plot(time,(rawData(:,1)-settings.xMinVal)./xVoltsPerStep)
@@ -116,7 +118,7 @@ ylabel('Voltage (V)')
 linkaxes(h(:))
 
 %% Plot differences 
-figure; 
+figure(3); 
 subplot(2,1,1)
 plot(diff(seq(:,1)))
 disp(unique(diff(seq(:,1))))
