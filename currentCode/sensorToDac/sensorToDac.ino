@@ -269,7 +269,7 @@ void loop()
     wireOut[1] = 16; 
   }  
 
- /*
+  /*
   Serial.print("X Dat: "); 
   Serial.print(xydat[0]); 
   Serial.print("Y Dat: "); 

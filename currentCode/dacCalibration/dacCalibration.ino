@@ -293,13 +293,16 @@ void loop()
 
   for (testDat = 16; testDat < 4067; testDat=testDat+15)  
   {
+        // low = 16, high = 4066, mid = 2041
         cw.start();
         int randNumber;
         int testNum;
         randNumber = random(1, 271);
         testNum = 1+15*randNumber;
-        wireOut[0] = testDat; 
-        wireOut[1] = testDat; 
+        //wireOut[0] = testDat; 
+        //wireOut[1] = testDat; 
+        wireOut[0] = 2041; 
+        wireOut[1] = 2041;
         Serial.println(testDat);
         cw.stop();
 

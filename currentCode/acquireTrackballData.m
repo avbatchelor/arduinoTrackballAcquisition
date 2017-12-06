@@ -24,7 +24,7 @@ inChannelsUsed =0:1;
 
 %% Configure daq
 % daqreset;
-devID = 'Dev1';
+devID = 'Dev3';
 
 %% Configure input session
 sIn = daq.createSession('ni');
@@ -67,64 +67,82 @@ seq2(:,2) = round((rawData(:,2) - settings.yMinVal)./yVoltsPerStep);
 seq2(seq>maxInt) = maxInt;
 seq2(seq<0) = 0;
 
-%% Plot data in volts
 time = [1/sampRate:1/sampRate:Dur];
+
 figure(1)
 h(1) = subplot(2,1,1);
 hold on 
-plot(time,rawData(:,1)-settings.xMinVal)
-plot(time,smoothedData(:,1)-settings.xMinVal,'r')
-plot(time,seq(:,1)*xVoltsPerStep,'g')
-plot(time,seq2(:,1)*xVoltsPerStep,'k')
+plot(time,rawData(:,1))
+plot(time,smoothedData(:,1),'r')
 title('x')
 xlabel('Time (s)')
 ylabel('Voltage (V)')
+legend('raw','smoothed')
+
 
 h(2) = subplot(2,1,2);
 hold on 
-plot(time,rawData(:,2)-settings.yMinVal);
-plot(time,smoothedData(:,2)-settings.yMinVal,'r');
-plot(time,seq(:,2)*yVoltsPerStep,'g');
-plot(time,seq2(:,2)*xVoltsPerStep,'k')
-title('y')
-xlabel('Time (s)')
-ylabel('Voltage (V)')
+plot(time,rawData(:,2));
+plot(time,smoothedData(:,2),'r');
+legend('raw','smoothed')
 
-linkaxes(h(:))
-
-%% Plot data in steps
-time = [1/sampRate:1/sampRate:Dur];
-figure(2)
-h(1) = subplot(2,1,1);
-hold on 
-plot(time,(rawData(:,1)-settings.xMinVal)./xVoltsPerStep)
-plot(time,(smoothedData(:,1)-settings.xMinVal)./xVoltsPerStep,'r')
-plot(time,seq(:,1),'g')
-plot(time,seq2(:,1),'k')
-title('x')
-xlabel('Time (s)')
-ylabel('Voltage (V)')
-
-h(2) = subplot(2,1,2);
-hold on 
-plot(time,(rawData(:,2)-settings.yMinVal)./yVoltsPerStep);
-plot(time,(smoothedData(:,2)-settings.yMinVal)./yVoltsPerStep,'r');
-plot(time,seq(:,2),'g');
-plot(time,seq2(:,2),'k')
-title('y')
-xlabel('Time (s)')
-ylabel('Voltage (V)')
-
-linkaxes(h(:))
-
-%% Plot differences 
-figure(3); 
-subplot(2,1,1)
-plot(diff(seq(:,1)))
-disp(unique(diff(seq(:,1))))
-subplot(2,1,2)
-plot(diff(seq(:,2)))
-disp(unique(diff(seq(:,2))))
+% %% Plot data in volts
+% figure(1)
+% h(1) = subplot(2,1,1);
+% hold on 
+% plot(time,rawData(:,1)-settings.xMinVal)
+% plot(time,smoothedData(:,1)-settings.xMinVal,'r')
+% plot(time,seq(:,1)*xVoltsPerStep,'g')
+% plot(time,seq2(:,1)*xVoltsPerStep,'k')
+% title('x')
+% xlabel('Time (s)')
+% ylabel('Voltage (V)')
+% 
+% h(2) = subplot(2,1,2);
+% hold on 
+% plot(time,rawData(:,2)-settings.yMinVal);
+% plot(time,smoothedData(:,2)-settings.yMinVal,'r');
+% plot(time,seq(:,2)*yVoltsPerStep,'g');
+% plot(time,seq2(:,2)*xVoltsPerStep,'k')
+% title('y')
+% xlabel('Time (s)')
+% ylabel('Voltage (V)')
+% 
+% linkaxes(h(:))
+% 
+% %% Plot data in steps
+% time = [1/sampRate:1/sampRate:Dur];
+% figure(2)
+% h(1) = subplot(2,1,1);
+% hold on 
+% plot(time,(rawData(:,1)-settings.xMinVal)./xVoltsPerStep)
+% plot(time,(smoothedData(:,1)-settings.xMinVal)./xVoltsPerStep,'r')
+% plot(time,seq(:,1),'g')
+% plot(time,seq2(:,1),'k')
+% title('x')
+% xlabel('Time (s)')
+% ylabel('Voltage (V)')
+% 
+% h(2) = subplot(2,1,2);
+% hold on 
+% plot(time,(rawData(:,2)-settings.yMinVal)./yVoltsPerStep);
+% plot(time,(smoothedData(:,2)-settings.yMinVal)./yVoltsPerStep,'r');
+% plot(time,seq(:,2),'g');
+% plot(time,seq2(:,2),'k')
+% title('y')
+% xlabel('Time (s)')
+% ylabel('Voltage (V)')
+% 
+% linkaxes(h(:))
+% 
+% %% Plot differences 
+% figure(3); 
+% subplot(2,1,1)
+% plot(diff(seq(:,1)))
+% disp(unique(diff(seq(:,1))))
+% subplot(2,1,2)
+% plot(diff(seq(:,2)))
+% disp(unique(diff(seq(:,2))))
 
 %% Calculate mean Value 
 startMean = settings.sampRate; 
