@@ -273,7 +273,7 @@ void loop()
 
   // Add 127 so that data can be read as binary number 
   xydatCut[0] = xydatCut[0] + 127;
-  xydatCut[1] = xydatCut[1] + 127;
+  xydatCut[1] = xydatCut[1] + 50;
 
   // Threshold data that goes out of range 
   if (xydatCut[0] > 254) {
