@@ -272,8 +272,16 @@ void loop()
   xydatCut[1] = xydat[1];
 
   // Add 127 so that data can be read as binary number 
-  xydatCut[0] = xydatCut[0] + 127;
-  xydatCut[1] = xydatCut[1] + 50;
+  // x axis
+  //xydatCut[0] = xydatCut[0] + 127;
+  // y axis
+  //xydatCut[1] = xydatCut[1] + 50;
+
+  //Switch axes on 04/24/2018
+  // y axis 
+  xydatCut[0] = xydatCut[0] + 204;
+  // x axis 
+  xydatCut[1] = xydatCut[1] + 127;
 
   // Threshold data that goes out of range 
   if (xydatCut[0] > 254) {
